@@ -4,7 +4,8 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export const fetchEmployees = async () => {
   const response = await axios.get(`${API_BASE}/employees`);
-  return response.data;
+  // API returns { success, count, data }
+  return response.data.data;
 };
 
 export const getEmployee = async (id) => {
