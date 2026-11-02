@@ -1,0 +1,79 @@
+# =============================================================
+# docker-compose.yml — Orchestrates all three Docker services
+# Run with: docker compose up --build
+# =============================================================
+
+
+services:
+
+  # ─── 1. MySQL Database ───────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: ems_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # Persist database data even after container restarts
+      - mysql_data:/var/lib/mysql
+      # Run this SQL script automatically on first startup
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ems_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # NOTE: Port 3306 is intentionally NOT exposed to the host machine.
+    # Only the backend service can reach the database inside Docker's network.
+
+  # ─── 2. Flask Backend ────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ems_backend
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SECRET_KEY}
+      DB_HOST: db                 # "db" = the service name above, NOT localhost
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy   # Wait until MySQL is ready before starting Flask
+    networks:
+      - ems_network
+
+  # ─── 3. React Frontend ────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ems_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - ems_network
+
+# ─── Named Volume (persists MySQL data) ────────────────────────
+volumes:
+  mysql_data:
+
+# ─── Shared Network (containers talk to each other by name) ────
+networks:
+  ems_network:
+    driver: bridge
