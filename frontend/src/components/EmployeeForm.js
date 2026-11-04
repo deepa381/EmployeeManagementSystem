@@ -12,7 +12,7 @@ function EmployeeForm({ employee, onClose, onSubmit }) {
   const [form, setForm] = useState({
     full_name: '',
     email: '',
-    phone_number: '',
+    phone: '',
     department: '',
     designation: '',
     salary: '',
@@ -25,7 +25,7 @@ function EmployeeForm({ employee, onClose, onSubmit }) {
       setForm({
         full_name: employee.full_name || '',
         email: employee.email || '',
-        phone_number: employee.phone_number || '',
+        phone: employee.phone || '',
         department: employee.department || '',
         designation: employee.designation || '',
         salary: employee.salary || '',
@@ -82,8 +82,8 @@ function EmployeeForm({ employee, onClose, onSubmit }) {
               {errors.email && <div className="form-error">{errors.email}</div>}
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="phone_number">Phone Number</label>
-              <input className="form-input" id="phone_number" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+1-555-1234" />
+              <label className="form-label" htmlFor="phone">Phone Number</label>
+              <input className="form-input" id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder="+1-555-1234" />
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="department">Department<span className="required">*</span></label>

@@ -55,7 +55,7 @@ function EmployeeTable({ employees, loading, onEdit, onDelete }) {
                 <td className="td-id">{emp.id}</td>
                 <td className="td-primary">{emp.full_name}</td>
                 <td>{emp.email}</td>
-                <td>{emp.phone_number}</td>
+                <td>{emp.phone}</td>
                 <td>{emp.department}</td>
                 <td>{emp.designation}</td>
                 <td className="salary-value">${emp.salary}</td>
